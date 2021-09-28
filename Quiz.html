@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Quiz</title>
+    </head>
+    <style>
+        body {
+            text-align: center;
+            background-color:lightpink;
+            margin-top: 2%;
+            font-family: cursive;
+            font-size: 30px;
+        }
+        .alignOptions {
+            text-align: center;
+            font-size: 25px;
+        }
+
+        .alignSection {
+            vertical-align: text-top;
+        }
+
+        button:hover {
+            background-color: brown; 
+        }
+        button {
+            font-size: 25px;
+            border-radius: 6px;
+        }
+
+        label {
+            transition:0.5s;
+        }
+
+        input[type="radio"]{
+        -webkit-appearance: none;
+        }
+
+        input[type="radio"]:checked + label {
+            background-color:#18f98d;
+        }
+
+        .oddClass {
+            border: 3px solid #18f98d;
+            border-radius: 30px;
+            width: 500px;
+            height: 200px;
+            align-items: center;
+            display: inline-flex;
+            justify-content: center;
+        }
+
+        .evenClass{
+            border: 3px solid #18f98d;
+            border-radius: 30px;
+            width: 500px;
+            height: 200px;
+            align-items: center;
+            display: inline-flex;
+            justify-content: center;
+        }
+
+    </style>
+    <body>
+        
+        <h1 style="margin-top: 10%;" data-bind="hidden: isQuizStarted">Welcome to trivia questions vol.10</h1>
+        <label for="difficulty" data-bind="hidden: isQuizStarted">Choose difficulty:</label>
+            <select required name="difficulty" id="difficulty" data-bind="options: difficulties, 
+                                                                            hidden: isQuizStarted, 
+                                                                            value: selectedDifficulty">
+            </select>
+
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+            <label for="category" data-bind="hidden: isQuizStarted">Choose a category:</label>
+            <select required name="category" id="category" data-bind="options: categories, 
+                                                                        hidden: isQuizStarted, 
+                                                                        value: selectedCategory">
+            </select>
+            <br>
+            <br>
+        
+        <button data-bind="click: startQuiz, 
+                            hidden: isQuizStarted, 
+                            enable: (selectedDifficulty() != null && selectedCategory() != null)"><i>Let's get started!</i></button>
+
+        <div data-bind="visible: endOfTest">
+            <p>Your score is: <span data-bind="text: score"></span>/10.</p>
+        <p data-bind="text: finalCaption"></p>
+        <!-- ko ifnot: viewAnswers-->
+        <button data-bind="click: viewTest">Click here to view the answers</button>
+        <!-- /ko -->
+        </div>
+
+        <div class="alignSection" data-bind="template: {
+                                                        name: 'section-template', 
+                                                        foreach: layoutOfSections
+                                                        }, 
+                                            visible: (isQuizStarted || viewAnswers)"></div>
+
+        <script type="text/html" id="section-template">
+            <div data-bind="visible: (isActive() == true || $parent.viewAnswers() == true)">
+                <h3>Question
+                    <span data-bind="text: ($index() + 1)"></span>
+
+                    <!-- ko if: $parent.viewAnswers -->
+                    <span data-bind="if: selectedAnswer() == correctAnswer">&#9989;</span>
+                    <span data-bind="if: selectedAnswer() != correctAnswer">&#10060;</span>
+                    <!-- /ko -->
+                </h3>
+
+                <h3 data-bind="html: question"></h3>
+
+                <div class="alignOptions" data-bind="template: {
+                                                                name: 'options-template', 
+                                                                foreach: options, as: 'option'
+                                                                }"></div>
+
+                <div data-bind="if: ($parent.viewAnswers() == true && selectedAnswer() != correctAnswer)">
+                    <p>Your answer: <span data-bind="html: selectedAnswer"></span></p>
+                    <p>Correct answer: <span data-bind="html: correctAnswer"></span></p>
+                </div>
+
+
+                <!-- ko if: ($parent.viewAnswers() == true && $index() < 9) -->
+                <div style="border-bottom: 3px solid orange"></div>
+                <!-- /ko -->
+                
+
+                <button data-bind="click: $parent.showNextQuestion, 
+                                    enable: selectedAnswer, 
+                                    visible: ($parent.indexOfSection() < 9 && $parent.endOfTest() == false)"><i>Next question</i></button>
+                <button data-bind="click: $parent.showNextQuestion, 
+                                    enable: selectedAnswer, 
+                                    visible: ($parent.indexOfSection() > 8 && $parent.endOfTest() == false)">Submit test</button>
+            </div>
+        </script>
+
+        <script type="text/html" id="options-template">
+            <!-- ko if: $parents[1].viewAnswers() == false -->
+            <input type="radio" data-bind="checked: $parent.selectedAnswer, 
+                                            value: option, 
+                                            attr: {id: option}">
+            <!-- /ko -->
+                <label data-bind="html: option, 
+                                attr: {for: option}, 
+                                css:{
+                                    oddClass: $index() % 2 != 0, 
+                                    evenClass: $index() % 2 == 0
+                                    }, 
+                                style:{'background-color': 
+                                            ($parents[1].endOfTest() == true) ? (
+                                                (option == $parent.selectedAnswer()) ? (
+                                                    ($parent.selectedAnswer() == $parent.correctAnswer) ? 
+                                                        '#18f98d' : 'red')
+                                                        : (option == $parent.correctAnswer) ? 
+                                                    '#18f98d' : 'none') 
+                                                : 'none'}"></label>
+                <!-- ko if: $index() % 2 != 0-->
+                <br>
+                <br>
+                <!-- /ko -->
+
+        </script>
+
+        <script src="knockout-v3.5.1.js"></script>
+        <script src="Quiz.js"></script>
+    </body>
+</html>
